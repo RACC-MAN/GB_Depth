@@ -17,7 +17,7 @@
 
   <depend>sensor_msgs</depend> 
   <depend>cv_bridge</depend>
-  <depend>depth_data_msgs</depend> 
+  <depend>gbdepth_msgs</depend> 
 
   <exec_depend>ros2launch</exec_depend>
 
