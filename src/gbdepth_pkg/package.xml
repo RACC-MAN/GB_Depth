@@ -12,9 +12,14 @@
   <test_depend>ament_lint_auto</test_depend>
   <test_depend>ament_lint_common</test_depend>
 
-  <exec_depend>ros2launch</exec_depend>
+  <depend>rclcpp</depend>
+  <depend>rclcpp_components</depend>
 
+  <depend>sensor_msgs</depend> 
+  <depend>cv_bridge</depend>
   <depend>depth_data_msgs</depend> 
+
+  <exec_depend>ros2launch</exec_depend>
 
   <export>
     <build_type>ament_cmake</build_type>

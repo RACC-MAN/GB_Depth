@@ -1,5 +1,5 @@
-#ifndef GBDEPTH_PKG__AMERA_NODE
-#define GBDEPTH_PKG__AMERA_NODE
+#ifndef GBDEPTH_PKG__CAMERA_NODE
+#define GBDEPTH_PKG__CAMERA_NODE
 
 #include <rclcpp/rclcpp.hpp>
 #include <sensor_msgs/msg/image.hpp>
@@ -24,4 +24,4 @@ class CameraNode : public rclcpp::Node
         cv::Mat frame;
 };
 
-#endif GBDEPTH_PKG__AMERA_NODE
+#endif GBDEPTH_PKG__CAMERA_NODE
