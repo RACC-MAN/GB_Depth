@@ -51,4 +51,12 @@ def generate_launch_description():
     )
     ld.add_action(ground_estimation)
 
+    pcl_estimation = Node(
+        package='gbdepth_pkg',
+        executable = 'pcl_estimation_node',
+        name = 'pcl_estimation_node',
+        parameters = sensor_params,
+    )
+    ld.add_action(pcl_estimation)
+
     return ld
