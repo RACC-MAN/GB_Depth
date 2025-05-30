@@ -97,9 +97,9 @@ void PclEstimationNode::depth_callback(gbdepth_msgs::msg::DepthData::SharedPtr m
             new_point.z = pointZ;
 
             int accesspoint = i*image_step + j*image_elemSize;
-            new_point.r = camera_img.data[ accesspoint + 2];
+            new_point.r = camera_img.data[ accesspoint + 0];
             new_point.g = camera_img.data[ accesspoint + 1];
-            new_point.b = camera_img.data[ accesspoint + 0];
+            new_point.b = camera_img.data[ accesspoint + 2];
 
             pcl_data.points.push_back(new_point);
         }
