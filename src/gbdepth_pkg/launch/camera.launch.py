@@ -44,4 +44,11 @@ def generate_launch_description():
     )
     ld.add_action(depth_estimation)
 
+    ground_estimation = Node(
+        package='gbdepth_pkg',
+        executable = 'ground_estimation_node',
+        name = 'ground_estimation_node',
+    )
+    ld.add_action(ground_estimation)
+
     return ld

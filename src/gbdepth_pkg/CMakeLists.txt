@@ -13,6 +13,7 @@ find_package(OpenCV REQUIRED)
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/camera_node.cpp
   src/depth_estimation_node.cpp
+  src/ground_estimation_node.cpp
 )
 
 target_link_libraries(${PROJECT_NAME}
@@ -27,6 +28,11 @@ rclcpp_components_register_node(${PROJECT_NAME}
 rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "DepthEstimationNode"
   EXECUTABLE depth_estimation_node
+)
+
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "GroundEstimationNode"
+  EXECUTABLE ground_estimation_node
 )
 
 target_link_libraries(${PROJECT_NAME})
