@@ -19,7 +19,7 @@ target_link_libraries(${PROJECT_NAME}
 )
 
 rclcpp_components_register_node(${PROJECT_NAME}
-  PLUGIN "gbdepth_pkg::camera_node"
+  PLUGIN "CameraNode"
   EXECUTABLE camera_node
 )
 
@@ -32,6 +32,7 @@ endif()
 
 ament_auto_package(
   INSTALL_TO_SHARE
+  launch
 )
 
 install(FILES DESTINATION share/${PROJECT_NAME})

@@ -24,4 +24,4 @@ class CameraNode : public rclcpp::Node
         cv::Mat frame;
 };
 
-#endif GBDEPTH_PKG__CAMERA_NODE
+#endif
