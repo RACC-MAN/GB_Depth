@@ -4,27 +4,39 @@ from rclpy.node import Node
 from sensor_msgs.msg import Image
 from gbdepth_msgs.msg import DepthData
 
+import numpy as np
 import cv2
+from cv_bridge import CvBridge
 import torch
 
+import sys
+sys.path.append("./GB_Depth/src/Depth-Anything-V2")
 from depth_anything_v2.dpt import DepthAnythingV2
 
 class DepthEstimationNode(Node):
     
     def __init__(self):
         super().__init__('depth_estimation_node')
-        self.publisher_ = self.create_publisher(Image, 'topic', self.callback, 10)
-        self.image_sub_ = self.create_subscription(Image, )
-        self.image_pub_ = self.create_publisher(Image, '', 10)
-        self.depth_pub_ = self.create_publisher(DepthData, '', 10)
-        self.depth_n_pub_ = self.create_publisher(DepthData, '', 10)
-        self.height_pub_ = self.create_publisher(DepthData, '', 10)
+        self.image_sub_ = self.create_subscription(Image, '/camera/camera/color/image_raw', self.callback, 10)
+        self.image_pub_ = self.create_publisher(Image, 'depth_img', 10)
+        self.depth_pub_ = self.create_publisher(DepthData, 'depth_data', 10)
+        self.depth_n_pub_ = self.create_publisher(DepthData, 'depth_n_data', 10)
+        self.height_pub_ = self.create_publisher(DepthData, 'height_data', 10)
 
-        self.SENSOR_DIST_ 
-        self.EYE_POSITION_
+        self.declare_parameter('sensor_dist', 887.73)
+        self.declare_parameter('eye_position', 0.880)
+
+        self.SENSOR_DIST_ = self.get_parameter('sensor_dist').get_parameter_value().double_value
+        self.EYE_POSITION_ = self.get_parameter('eye_position').get_parameter_value().double_value
+        self.get_logger().info(f"sensor_dist: {self.SENSOR_DIST_}, eye_position: {self.EYE_POSITION_}")
+
+        self.bridge = CvBridge()
+
+        self.initialize_model()
 
     def initialize_model(self):
         DEVICE = 'cuda' if torch.cuda.is_available() else 'mps' if torch.backends.mps.is_available() else 'cpu'
+        self.get_logger().info(f"DEVICE: {DEVICE}")
 
         model_configs = {
             'vits': {'encoder': 'vits', 'features': 64, 'out_channels': [48, 96, 192, 384]},
@@ -33,16 +45,58 @@ class DepthEstimationNode(Node):
             'vitg': {'encoder': 'vitg', 'features': 384, 'out_channels': [1536, 1536, 1536, 1536]}
         }
 
-        encoder = 'vitl' # or 'vits', 'vitb', 'vitg'
+        encoder = 'vits' # or 'vits', 'vitb', 'vitg'
 
         self.model = DepthAnythingV2(**model_configs[encoder])
-        self.model.load_state_dict(torch.load(f'checkpoints/depth_anything_v2_{encoder}.pth', map_location='cpu'))
+        self.model.load_state_dict(torch.load(f'./models/depth_anythingv2/depth_anything_v2_{encoder}.pth', map_location='cpu'))
         self.model = self.model.to(DEVICE).eval()
 
     
-    def callback(self):
-        raw_img = cv2.imread('your/image/path')
+    def callback(self, msg):
+        raw_img = self.bridge.imgmsg_to_cv2(msg, 'bgr8')
         depth = self.model.infer_image(raw_img) 
+
+        height, width = depth.shape
+        ch, cw = height / 2.0, width / 2.0
+
+        # minDe, maxDe = np.min(depth), np.max(depth)
+        # rangeDe = maxDe - minDe
+
+        # # --- DepthData メッセージ生成 ---
+        # depth_n_data = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))
+        # depth_data = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))
+        # height_data = DepthData(width=width, height=height)
+
+        # max_h, min_h = -np.inf, np.inf
+
+        # for i in range(height):
+        #     for j in range(width):
+        #         De = depth[i, j]
+        #         value_norm = (maxDe - De) / rangeDe
+        #         depth_n_data.data.append(value_norm)
+
+        #         value = 1.0 / De
+        #         depth_data.data.append(value)
+
+        #         pix_y = i - ch
+        #         pix_x = j - cw
+        #         pix_dist_inv = 1.0 / self.SENSOR_DIST_
+        #         h_val = value * pix_y * pix_dist_inv
+        #         height_data.data.append(h_val)
+        #         max_h = max(max_h, h_val)
+        #         min_h = min(min_h, h_val)
+
+        # height_data.max = float(max_h)
+        # height_data.min = float(min_h)
+
+        # depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
+        # depth = depth.astype(np.uint8)
+        # depth_image = self.bridge.cv2_to_imgmsg(depth, "mono8", msg.header)
+        # self.image_pub_.publish(depth_image)
+
+        # self.depth_n_pub_.publish(depth_n_data)
+        # self.depth_pub_.publish(depth_data)
+        # self.height_pub_.publish(height_data)
 
 def main(args=None):
     rclpy.init(args=args)
