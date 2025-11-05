@@ -76,37 +76,40 @@ class DepthEstimationNode(Node):
 
         # --- DepthData メッセージ生成 ---
         depth_n_data = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))
-        depth_data   = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))
-        height_data  = DepthData(width=width, height=height)
+        depth_data = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))
+        height_data = DepthData(width=width, height=height)
 
-        # ---- ベクトル化計算 ----
-        value = (2 * maxDe - depth) / rangeDe   # (H, W) の行列演算
+        # max_h, min_h = -np.inf, np.inf
 
-        # ピクセル座標差をベクトルで生成
-        y_indices = np.arange(height).reshape(-1, 1) - ch
-        pix_dist_inv = 1.0 / self.SENSOR_DIST_
+        # for i in range(height):
+        #     for j in range(width):
+        #         De = depth[i, j]
+        #         value = (2*maxDe - De) / rangeDe
+        #         depth_n_data.data.append(value)
 
-        # 高さマップを一括計算
-        h_val = value * y_indices * pix_dist_inv
+        #         # if De != 0:
+        #         #     value = 1.0 / De
+        #         depth_data.data.append(value)
 
-        # flattenしてlist化
-        depth_n_data.data = value.flatten().tolist()
-        depth_data.data   = value.flatten().tolist()
-        height_data.data  = h_val.flatten().tolist()
+        #         pix_y = i - ch
+        #         pix_x = j - cw
+        #         pix_dist_inv = 1.0 / self.SENSOR_DIST_
+        #         h_val = value * pix_y * pix_dist_inv
+        #         height_data.data.append(h_val)
+        #         max_h = max(max_h, h_val)
+        #         min_h = min(min_h, h_val)
 
-        max_h, min_h = np.max(h_val), np.min(h_val)
-
-        height_data.max = float(max_h)
-        height_data.min = float(min_h)
+        # height_data.max = float(max_h)
+        # height_data.min = float(min_h)
 
         depth = (depth - depth.min()) / (depth.max() - depth.min()) * 255.0
         depth = depth.astype(np.uint8)
         depth_image = self.bridge.cv2_to_imgmsg(depth, "mono8", self.img_ptr_.header)
         self.image_pub_.publish(depth_image)
 
-        self.depth_n_pub_.publish(depth_n_data)
-        self.depth_pub_.publish(depth_data)
-        self.height_pub_.publish(height_data)
+        # self.depth_n_pub_.publish(depth_n_data)
+        # self.depth_pub_.publish(depth_data)
+        # self.height_pub_.publish(height_data)
 
 def main(args=None):
     rclpy.init(args=args)
