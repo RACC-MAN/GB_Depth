@@ -13,6 +13,7 @@ find_package(PCL REQUIRED)
 
 ament_auto_add_library(${PROJECT_NAME} SHARED
   src/camera_node.cpp
+  src/capture_node.cpp
   src/depth_estimation_node.cpp
   src/ground_estimation_node.cpp
   src/pcl_estimation_node.cpp
@@ -26,6 +27,11 @@ target_link_libraries(${PROJECT_NAME}
 rclcpp_components_register_node(${PROJECT_NAME}
   PLUGIN "CameraNode"
   EXECUTABLE camera_node
+)
+
+rclcpp_components_register_node(${PROJECT_NAME}
+  PLUGIN "CaptureNode"
+  EXECUTABLE capture_node
 )
 
 rclcpp_components_register_node(${PROJECT_NAME}
