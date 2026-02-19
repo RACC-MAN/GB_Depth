@@ -3,7 +3,7 @@
 CameraNode::CameraNode(const rclcpp::NodeOptions & options) : Node("camera_node", options)
 {
     int camera_num, publish_freq;
-    declare_parameter("camera_num", 0);
+    declare_parameter("camera_num", 4);
     declare_parameter("publish_freq", 100);
     get_parameter("camera_num", camera_num);
     get_parameter("publish_freq", publish_freq);

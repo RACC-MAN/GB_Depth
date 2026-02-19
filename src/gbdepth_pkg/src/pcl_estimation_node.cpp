@@ -74,7 +74,8 @@ void PclEstimationNode::depth_callback(gbdepth_msgs::msg::DepthData::SharedPtr m
     least_squares_calc(sample_data, point_num);
     // RCLCPP_INFO(this->get_logger(), "scale:%f, shift:%f", SCALE_VALUE, SHIFT_VALUE);
 
-
+    // SCALE_VALUE = 1;
+    // SHIFT_VALUE = 0;
     pcl::PointCloud<pcl::PointXYZRGB> pcl_data;
     for(int i=0; i<height; i+=PIXEL_STEP)
     {

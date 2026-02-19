@@ -24,7 +24,7 @@ class DepthEstimationNode(Node):
         self.depth_n_pub_ = self.create_publisher(DepthData, 'depth_n_data', 10)
         self.height_pub_ = self.create_publisher(DepthData, 'height_data', 10)
 
-        self.timer_ = self.create_timer(0.2, self.timer_callback)
+        self.timer_ = self.create_timer(0.1, self.timer_callback)
         self.img_ptr_ = None
 
         self.declare_parameter('sensor_dist', 887.73)
@@ -73,6 +73,8 @@ class DepthEstimationNode(Node):
         minDe, maxDe = np.min(depth), np.max(depth)
         self.get_logger().info(f"min: {minDe}, max: {maxDe}")
         rangeDe = maxDe - minDe
+
+        
 
         # --- DepthData メッセージ生成 ---
         depth_n_data = DepthData(width=width, height=height, max=float(maxDe), min=float(minDe))

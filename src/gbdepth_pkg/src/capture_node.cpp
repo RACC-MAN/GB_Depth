@@ -1,48 +1,63 @@
 #include "gbdepth_pkg/capture_node.hpp"
 
-CaptureNode::CaptureNode(const rclcpp::NodeOptions & options) : Node("capture_node", options)
+CaptureNode::CaptureNode(const rclcpp::NodeOptions & options)
+: Node("capture_node", options), frame_id_(0)
 {
     int camera_num, publish_freq;
-    declare_parameter("camera_num", 0);
-    declare_parameter("publish_freq", 30);
+
+    declare_parameter("camera_num", 4);
+    declare_parameter("publish_freq", 1000);
+
     get_parameter("camera_num", camera_num);
     get_parameter("publish_freq", publish_freq);
 
-    RCLCPP_INFO( get_logger(), "\nCamera Node Started.");
-    image_pub_ = create_publisher<sensor_msgs::msg::Image>("camera_img", 10);
-    timer_ = create_wall_timer(std::chrono::milliseconds(publish_freq), std::bind(&CaptureNode::callback, this));
-    
-    RCLCPP_INFO( get_logger(), "\nConecting to camera...");
-    cap.open(url_);
-    if(cap.isOpened())
-    {
-    cap.read(frame);
-    int height = frame.rows;
-    int width  = frame.cols;
-    RCLCPP_INFO( get_logger(), "\nCamera {%d} is opened. height:%3d, width:%3d", camera_num, height, width);
-    } 
+    RCLCPP_INFO(get_logger(), "Camera Node Started.");
+
+    image_sub_ = create_subscription<sensor_msgs::msg::Image>(
+        "camera_img", 10,
+        std::bind(&CaptureNode::imageCallback, this, std::placeholders::_1));
+
+    frame_id_ = 0;
+    counter_ = 5;
+    timer_ = create_wall_timer(
+        std::chrono::milliseconds(publish_freq),
+        std::bind(&CaptureNode::timerCallback, this));
+        
 }
 
-
-void CaptureNode::callback()
+void CaptureNode::imageCallback(const sensor_msgs::msg::Image::SharedPtr msg)
 {
-    sensor_msgs::msg::Image msg_out;
-    std_msgs::msg::Header header_;
-    cv_bridge::CvImage cv_img;
-
-
-    cap.read(frame);
-    // frame = cv::imread("path/to/image.file");
-    if(frame.empty())
+    cv_bridge::CvImagePtr cv_ptr;
+    try
     {
-        RCLCPP_INFO( get_logger(), "Frame is empty.");
+        cv_ptr = cv_bridge::toCvCopy(msg, sensor_msgs::image_encodings::BGR8);
+    }
+    catch (cv_bridge::Exception& e)
+    {
+        RCLCPP_ERROR(get_logger(), "cv_bridge exception: %s", e.what());
+        return;
+    }
+    frame_ = cv_ptr->image;
+}
+
+void CaptureNode::timerCallback()
+{
+    if(counter_ > 0)
+    {
+        RCLCPP_INFO(get_logger(), "Capturing in %d seconds...", counter_);
+        counter_--;
         return;
     }
 
-    header_.stamp = get_clock() -> now();
-    cv_img = cv_bridge::CvImage(header_, sensor_msgs::image_encodings::BGR8, frame);
-    cv_img.toImageMsg(msg_out);
-    image_pub_->publish(msg_out);
+    if(frame_.empty()) return;
+
+    std::string filename = "capture_" +
+        std::to_string(frame_id_) + ".png";
+
+    cv::imwrite(filename, frame_);
+    RCLCPP_INFO(get_logger(), "Saved %s", filename.c_str());
+    frame_id_++;
+    counter_ = 5;
 }
 
 #include <rclcpp_components/register_node_macro.hpp>

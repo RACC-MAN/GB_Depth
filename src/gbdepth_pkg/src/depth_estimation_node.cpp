@@ -20,7 +20,7 @@ DepthEstimationNode::DepthEstimationNode(const rclcpp::NodeOptions &options) : N
     
     // Read Network
     // const std::string model = "./src//model-f6b98070.onnx"; // MiDaS v2.1 Large
-    const std::string model = "/home/keisoku/gbdepth_ws/model-small.onnx"; // MiDaS v2.1 Small
+    const std::string model = "/home/keisoku/gbdepth_ws/models/midas/model-small.onnx"; // MiDaS v2.1 Small
     net = cv::dnn::readNet( model );
     if( net.empty() ){
         RCLCPP_INFO(this->get_logger(), "net is empty");
@@ -64,7 +64,7 @@ void DepthEstimationNode::callback(const sensor_msgs::msg::Image::SharedPtr msg_
     cv::resize( output, output, input.size() );
     int height = input.rows;
     int width = input.cols;
-    // RCLCPP_INFO(this->get_logger(), "\nheight:%d, width:%d", height, width);
+    RCLCPP_INFO(this->get_logger(), "\nheight:%d, width:%d", height, width);
     float ch = height/2.0;
     float cw = width/2.0;
     // RCLCPP_INFO(this->get_logger(), "h:%3d, w:%3d", height, width);

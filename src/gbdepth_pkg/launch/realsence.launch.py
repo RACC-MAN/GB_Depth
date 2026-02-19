@@ -46,14 +46,14 @@ def generate_launch_description():
 
     ld = LaunchDescription()
 
-    # depth_estimation = Node(
-    #     package='gbdepth_pkg',
-    #     executable = 'depth_estimation_node',
-    #     name = 'depth_estimation_node',
-    #     parameters = sensor_params,
-    #     remappings= [('camera_img', '/camera/camera/color/image_raw')],
-    # )
-    # ld.add_action(depth_estimation)
+    depth_estimation = Node(
+        package='gbdepth_pkg',
+        executable = 'depth_estimation_node',
+        name = 'depth_estimation_node',
+        parameters = sensor_params,
+        remappings= [('camera_img', '/camera/camera/color/image_raw')],
+    )
+    ld.add_action(depth_estimation)
 
     ground_estimation = Node(
         package='gbdepth_pkg',

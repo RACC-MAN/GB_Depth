@@ -41,7 +41,7 @@ class GroundEstimationNode : public rclcpp::Node
 
         gbdepth_msgs::msg::DepthData::SharedPtr height_data;
         float max_h, min_h, range_h;
-        float TRESH_HEIGHT = 0.50;
+        float TRESH_HEIGHT = 0.70;
         float TRESH_THETA = 0.8;
 };
 
